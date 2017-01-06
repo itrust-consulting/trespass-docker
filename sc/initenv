@@ -1,0 +1,88 @@
+#!/bin/bash
+set -e
+
+TOMCAT_USER=${TOMCAT_USER:-tomcat}
+TOMCAT_PASSWORD=${TOMCAT_PASSWORD:-tacmot}
+
+MYSQL_HOST=${MYSQL_HOST:-localhost}
+MYSQL_PORT=${MYSQL_PORT:-3306}
+MYSQL_USER=${MYSQL_USER:-root}
+MYSQL_PASSWORD=${MYSQL_PASSWORD:-root}
+MYSQL_DATABASE=${MYSQL_DATABASE:-trespass}
+
+C3P0_ACQUIREINCREMENT=${C3P0_ACQUIREINCREMENT:-5}
+C3P0_MINPOOLSIZE=${C3P0_MINPOOLSIZE:-5}
+C3P0_MAXPOOLSIZE=${C3P0_MAXPOOLSIZE:-600}
+C3P0_MAXIDLETIME=${C3P0_MAXIDLETIME:-1800}
+C3P0_IDLE_TEST_PERIOD=${C3P0_IDLE_TEST_PERIOD:-1800}
+
+FTP_HOSTNAME=${FTP_HOSTNAME:-127.0.0.1}
+FTP_USERNAME=${FTP_USERNAME:-default}
+FTP_PASSWORD=${FTP_PASSWORD:-default}
+
+FTP_WORKDIRECTORY=${FTP_WORKDIRECTORY:-/home/ftp}
+
+RSA_KEY_PUBLIC=${RSA_KEY_PUBLIC:-/WEB-INF/privateData/service-public-key.der}
+RSA_KEY_PRIVATE=${RSA_KEY_PRIVATE:-/WEB-INF/privateData/service-public-key.der}
+
+AUTHENTICATION_REQUEST_TIMEOUT=${AUTHENTICATION_REQUEST_TIMEOUT:-300000}
+
+COCKPITCI_HOST=${COCKPITCI_HOST:-localhost}
+COCKPITCI_USERNAME=${COCKPITCI_USERNAME:-guest}
+COCKPITCI_PASSWORD=${COCKPITCI_PASSWORD:-guest}
+COCKPITCI_PORT=${COCKPITCI_PORT:-9000}
+COCKPITCI_VIRTUALHOST=${COCKPITCI_VIRTUALHOST:-PIDS}
+APP_SETTINGS_VERSION=${APP_SETTINGS_VERSION:-0.0.8}
+
+
+
+
+TOMCAT_JAVA_OPTS=${TOMCAT_JAVA_OPTS:- -server -Duser.timezone=Europe/Paris}
+
+
+sed 's/{{TOMCAT_USER}}/'"${TOMCAT_USER}"'/' -i /usr/local/tomcat/conf/tomcat-users.xml
+sed 's/{{TOMCAT_PASSWORD}}/'"${TOMCAT_PASSWORD}"'/' -i /usr/local/tomcat/conf/tomcat-users.xml
+
+rm -R /usr/local/tomcat/webapps/*
+
+unzip -d /usr/local/tomcat/webapps/ROOT /app.war
+
+cp /server.xml /usr/local/tomcat/conf/server.xml
+
+cp /application.properties /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+cp /US_export_policy.jar /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/
+cp /local_policy.jar /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/
+
+sed 's/<HOST>/'"${MYSQL_HOST}"'/' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's/<PORT>/'"${MYSQL_PORT}"'/' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's/<USER>/'"${MYSQL_USER}"'/' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's/<PASSWORD>/'"${MYSQL_PASSWORD}"'/' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's/<DATABASE>/'"${MYSQL_DATABASE}"'/' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<C3P0_ACQUIREINCREMENT>#'"${C3P0_ACQUIREINCREMENT}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<C3P0_MINPOOLSIZE>#'"${C3P0_MINPOOLSIZE}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<C3P0_MAXPOOLSIZE>#'"${C3P0_MAXPOOLSIZE}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<C3P0_MAXIDLETIME>#'"${C3P0_MAXIDLETIME}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<C3P0_IDLE_TEST_PERIOD>#'"${C3P0_IDLE_TEST_PERIOD}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+
+sed 's#<FTP_HOSTNAME>#'"${FTP_HOSTNAME}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<FTP_USERNAME>#'"${FTP_USERNAME}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<FTP_PASSWORD>#'"${FTP_PASSWORD}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+
+sed 's#<FTP_WORKDIRECTORY>#'"${FTP_WORKDIRECTORY}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<RSA_KEY_PUBLIC>#'"${RSA_KEY_PUBLIC}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<RSA_KEY_PRIVATE>#'"${RSA_KEY_PRIVATE}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<AUTHENTICATION_REQUEST_TIMEOUT>#'"${AUTHENTICATION_REQUEST_TIMEOUT}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<COCKPITCI_HOST>#'"${COCKPITCI_HOST}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<COCKPITCI_USERNAME>#'"${COCKPITCI_USERNAME}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<COCKPITCI_PASSWORD>#'"${COCKPITCI_PASSWORD}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<COCKPITCI_PORT>#'"${COCKPITCI_PORT}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<COCKPITCI_VIRTUALHOST>#'"${COCKPITCI_VIRTUALHOST}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+sed 's#<APP_SETTINGS_VERSION>#'"${APP_SETTINGS_VERSION}"'#' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/application.properties
+
+sed -i 's/{jdbc.url}/{jdbc.databaseurl}/g' /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/spring/application-config.xml
+
+sed 's/=\"http\"/=\"https\"/g' -i /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/spring/spring-security.xml
+
+sed "/#JAVA_OPTS/a JAVA_OPTS=\"$TOMCAT_JAVA_OPTS\"" -i /usr/local/tomcat/bin/catalina.sh
+
+/usr/local/tomcat/bin/catalina.sh run

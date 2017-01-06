@@ -1,0 +1,151 @@
+ldap:
+  build: ldap
+  env_file:
+   - ./ldap.env
+  ports:
+   - 389:389
+  volumes:
+   - /media/data/ldap/etc:/etc/ldap
+   - /media/data/ldap/var:/var/lib/ldap
+
+cas:
+  build: cas
+  ports:
+   - "2000:443"
+  links:
+   - ldap
+  env_file:
+   - ./cas.env
+  volumes:
+   - /media/data/cas:/tmp
+
+svn:
+  build: apache2
+  ports:
+   - "2001:443"
+  links:
+   - ldap
+  volumes:
+   - /media/data/svn/:/opt/svn
+  env_file:
+   - ./svn.env
+
+tkb-fe:
+  build: apache2
+  ports:
+   - "2002:443"
+  links:
+   - cas
+   - tkb
+  env_file:
+   - ./tkb-fe.env
+   
+tkb:
+  build: tkb
+  volumes:
+   - /media/data/svn/repo1/:/opt/svn/
+
+software:
+  build: software
+  links:
+   - sc
+  volumes:
+   - /media/data/software/:/opt/appserver
+   - /media/data/svn/repo1/:/var/www/:ro
+
+mysql:
+  build: mysql
+  env_file:
+   - ./mysql.env
+  volumes:
+   - /media/data/mysql/data:/var/lib/mysql/
+
+fe:
+  build: fe
+  ports:
+   - "2003:443"
+  env_file:
+   - ./fe.env
+  links:
+   - ldap
+   - mysql
+   - cas
+   - software
+  volumes:
+   - /media/data/svn/repo1/trespass-svn.itrust.lu/:/datarepo/  
+
+tkblogs:
+  build: apache2
+  ports:
+   - "2004:443"
+  links:
+   - cas
+  env_file:
+   - ./tkblogs.env
+  volumes:
+   - /root/sharetkblogs:/var/www/
+
+redmine:
+  build: redmine
+  ports:
+   - "2005:80"
+  links:
+   - cas
+   - mysql
+  env_file:
+   - ./redmine.env
+   
+sc:
+  build: sc
+  ports:
+   - "2006:443"
+  links:
+   - mysql   
+  env_file:
+   - ./sc.env
+   
+arguesecure:
+  build: arguesecure
+  ports:
+   - "2007:3002"
+   - "2008:80"
+   - "2009:443"
+  links:
+   - mysql
+   - arguesecure-memcached
+   - arguesecure-redis
+   - arguesecure-node
+  env_file:
+   - ./arguesecure.env
+
+arguesecure-memcached:
+  build: memcached
+
+arguesecure-redis:
+  build: redis
+   
+arguesecure-node:
+  build: node   
+   
+interactor-db:
+  build: mongo
+  volumes:
+   - /media/data/mongo/db:/data/db
+   - /media/data/mongo/configdb:/data/configdb
+  
+interactor:
+  build: interactor
+  links:
+   - interactor-db
+  ports:
+   - "2010:3000"   
+   
+trickservice:
+  build: trickservice
+  env_file:
+   - ./trickservice.env
+  links:
+   - mysql
+   - ldap
+  ports:
+   - 2011:8443

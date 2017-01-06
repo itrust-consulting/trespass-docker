@@ -1,0 +1,23 @@
+<VirtualHost *:443>
+
+	SSLEngine on
+
+	SSLCertificateFile	/epl-server.crt
+	SSLCertificateKeyFile /epl-server.key
+
+	SSLCertificateChainFile /epl-server-ca.crt
+
+    DocumentRoot /var/www
+    <Directory /var/www/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        allow from all
+    </Directory>
+
+    ErrorLog /proc/self/fd/2
+    # Possible values include: debug, info, notice, warn, error, crit,
+    # alert, emerg.
+    LogLevel warn
+    CustomLog /proc/self/fd/1 combined
+</VirtualHost>
